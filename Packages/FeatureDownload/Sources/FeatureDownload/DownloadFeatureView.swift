@@ -46,23 +46,36 @@ public final class DownloadFeatureViewModel: ObservableObject {
         }
 
         let needsFfmpeg = settings.config.remuxMode == .ffmpeg || settings.config.downloadMode == .nm3u8dlre
-        if needsFfmpeg && settings.config.toolPaths.ffmpeg.isEmpty {
-            statusMessage = L10n.tr("validation.ffmpeg", locale: settings.language)
-            isError = true
-            return
+        if needsFfmpeg {
+            settings.config.toolPaths.ffmpeg = resolveToolPath(.ffmpeg, current: settings.config.toolPaths.ffmpeg)
+            if settings.config.toolPaths.ffmpeg.isEmpty {
+                statusMessage = L10n.tr("validation.ffmpeg", locale: settings.language)
+                isError = true
+                return
+            }
         }
 
-        if settings.config.remuxMode == .mp4box && settings.config.toolPaths.mp4box.isEmpty {
-            statusMessage = L10n.tr("validation.mp4box", locale: settings.language)
-            isError = true
-            return
+        if settings.config.remuxMode == .mp4box {
+            settings.config.toolPaths.mp4box = resolveToolPath(.mp4box, current: settings.config.toolPaths.mp4box)
+            if settings.config.toolPaths.mp4box.isEmpty {
+                statusMessage = L10n.tr("validation.mp4box", locale: settings.language)
+                isError = true
+                return
+            }
         }
 
         let needsMp4decrypt = settings.config.remuxMode == .mp4box || !settings.config.codecSong.isLegacy
-        if needsMp4decrypt && settings.config.toolPaths.mp4decrypt.isEmpty {
-            statusMessage = L10n.tr("validation.mp4decrypt", locale: settings.language)
-            isError = true
-            return
+        if needsMp4decrypt {
+            settings.config.toolPaths.mp4decrypt = resolveToolPath(.mp4decrypt, current: settings.config.toolPaths.mp4decrypt)
+            if settings.config.toolPaths.mp4decrypt.isEmpty {
+                statusMessage = L10n.tr("validation.mp4decrypt", locale: settings.language)
+                isError = true
+                return
+            }
+        }
+
+        if settings.config.downloadMode == .nm3u8dlre {
+            settings.config.toolPaths.nm3u8dlre = resolveToolPath(.nm3u8dlre, current: settings.config.toolPaths.nm3u8dlre)
         }
 
         do {
@@ -83,6 +96,23 @@ public final class DownloadFeatureViewModel: ObservableObject {
 
     public func cancel(backend: BackendBridgeService) {
         backend.cancel()
+    }
+
+    private func resolveToolPath(_ tool: ToolName, current: String) -> String {
+        let bundled = Bundle.main.resourceURL?.appendingPathComponent("Tools")
+        let workspaceTools = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
+            .appendingPathComponent("Resources")
+            .appendingPathComponent("Tools")
+
+        if let resolved = ToolResolver.resolve(tool: tool, overridePath: current, bundledRoot: bundled) {
+            return resolved
+        }
+
+        if let resolved = ToolResolver.resolve(tool: tool, overridePath: current, bundledRoot: workspaceTools) {
+            return resolved
+        }
+
+        return current.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private func ensureDirectoryExists(_ path: String) -> Bool {

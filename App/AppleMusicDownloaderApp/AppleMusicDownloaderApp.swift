@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 
 @main
 struct AppleMusicDownloaderApp: App {
@@ -25,6 +26,8 @@ struct AppleMusicDownloaderApp: App {
         let bundleRoot = Bundle.main.resourceURL
         let workspaceRoot = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
             .appendingPathComponent("Resources")
+        let bundledBackendRoot = bundleRoot?.appendingPathComponent("PythonBackend")
+        let workspaceBackendRoot = workspaceRoot.appendingPathComponent("PythonBackend")
 
         let pythonBundlePath = bundleRoot?
             .appendingPathComponent("PythonBackend")
@@ -44,14 +47,86 @@ struct AppleMusicDownloaderApp: App {
             .appendingPathComponent("launcher.py")
             .path
 
-        let python = FileManager.default.fileExists(atPath: pythonBundlePath ?? "") ? (pythonBundlePath ?? "") :
-            (FileManager.default.fileExists(atPath: pythonWorkspacePath) ? pythonWorkspacePath : "/usr/bin/python3")
+        let python = resolvePythonExecutable(
+            bundledPath: pythonBundlePath,
+            workspacePath: pythonWorkspacePath,
+            backendRoots: [bundledBackendRoot?.path, workspaceBackendRoot.path]
+        )
         let launcher = FileManager.default.fileExists(atPath: launcherBundlePath ?? "") ? (launcherBundlePath ?? "") : launcherWorkspacePath
 
         return BackendLaunchContext(
             pythonExecutable: python,
             launcherScript: launcher
         )
+    }
+
+    private func resolvePythonExecutable(
+        bundledPath: String?,
+        workspacePath: String,
+        backendRoots: [String?]
+    ) -> String {
+        let fm = FileManager.default
+
+        if let bundledPath, fm.fileExists(atPath: bundledPath) {
+            return bundledPath
+        }
+        if fm.fileExists(atPath: workspacePath) {
+            return workspacePath
+        }
+
+        let preferredVersion = detectPreferredPythonVersion(backendRoots: backendRoots)
+        var pathCandidates: [String] = []
+
+        if let preferredVersion {
+            let major = preferredVersion.0
+            let minor = preferredVersion.1
+            pathCandidates += [
+                "/usr/local/bin/python\(major).\(minor)",
+                "/opt/homebrew/bin/python\(major).\(minor)",
+            ]
+        }
+
+        pathCandidates += [
+            "/usr/local/bin/python3",
+            "/opt/homebrew/bin/python3",
+            "/usr/bin/python3",
+        ]
+
+        if let resolved = pathCandidates.first(where: { fm.isExecutableFile(atPath: $0) }) {
+            return resolved
+        }
+
+        return "/usr/bin/python3"
+    }
+
+    private func detectPreferredPythonVersion(backendRoots: [String?]) -> (Int, Int)? {
+        let fm = FileManager.default
+        let pattern = /cpython-(\d{2,3})/
+
+        for root in backendRoots.compactMap({ $0 }) {
+            let sitePackages = URL(fileURLWithPath: root).appendingPathComponent("site-packages").path
+            guard fm.fileExists(atPath: sitePackages),
+                  let enumerator = fm.enumerator(atPath: sitePackages) else { continue }
+
+            for case let entry as String in enumerator {
+                guard entry.contains("cpython-"),
+                      let match = entry.firstMatch(of: pattern) else { continue }
+
+                let digits = String(match.1)
+                if digits.count == 2,
+                   let major = Int(String(digits.prefix(1))),
+                   let minor = Int(String(digits.suffix(1))) {
+                    return (major, minor)
+                }
+                if digits.count == 3,
+                   let major = Int(String(digits.prefix(1))),
+                   let minor = Int(String(digits.suffix(2))) {
+                    return (major, minor)
+                }
+            }
+        }
+
+        return nil
     }
 
     private func backendHealthCheck() -> String {
@@ -66,6 +141,7 @@ struct AppleMusicDownloaderApp: App {
         }
         return "Backend OK"
     }
+
 }
 
 struct RootView: View {
