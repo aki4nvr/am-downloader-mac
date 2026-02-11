@@ -1,4 +1,5 @@
 # Apple Music 下载器 Macport
+This is a fork and a SwiftUI wrapper for the great AMDL Python stuff. Works for macOS.
 
 Donate to the OG creator
 [here！](https://hcb.hackclub.com/donations/start/amdl)
