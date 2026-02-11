@@ -1,8 +1,6 @@
-# Apple Music 下载器
+# Apple Music 下载器 Macport
 
-初中生写的一个功能强大的 Apple Music 下载工具，基于gamdl，增加了图形化界面
-
-Donate（non-porfit,no tax)
+Donate to the OG creator
 [here！](https://hcb.hackclub.com/donations/start/amdl)
 
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/downloads/)
@@ -10,9 +8,7 @@ Donate（non-porfit,no tax)
 
 ## 致谢 / Acknowledgments
 
-本项目使用了 [gamdl (Glomatico's Apple Music Downloader)](https://github.com/glomatico/gamdl) 的代码。我们衷心感谢 [Glomatico](https://github.com/glomatico) 和所有 gamdl 的贡献者们为开源社区所做的杰出工作。
-
-This project utilizes code from [gamdl (Glomatico's Apple Music Downloader)](https://github.com/glomatico/gamdl). We sincerely thank [Glomatico](https://github.com/glomatico) and all contributors to gamdl for their outstanding work in the open-source community.
+本项目使用了 [gamdl (Glomatico's Apple Music Downloader)](https://github.com/glomatico/gamdl) 的代码。我们衷心感谢 [Glomatico](https://github.com/glomatico) 和所有 gamdl 的贡献者们为开源社区所做的杰出工作。本项目是个Fork from https://github.com/wenfeng110402/AppleMusic-Downloader. Thanks bro!
 
 ## 功能特性
 
@@ -20,22 +16,6 @@ This project utilizes code from [gamdl (Glomatico's Apple Music Downloader)](htt
 - 🎬 **高清音乐视频** - 支持最高 1080p 分辨率下载
 - 👤 **艺术家作品批量下载** - 通过多个链接或专辑歌单链接下载
 - 🎨 **高度可定制** - 丰富的配置选项满足个性化需求
-
-## 安装方式
-
-### 方法一：使用安装程序（推荐，仅限Windows）
-
-1. 从 [Releases](https://github.com/wenfeng110402/AppleMusic-Downloader/releases) 页面下载最新版本的安装程序
-2. 运行 `AppleMusicDownloader_Setup.exe` 并按照提示完成安装
-3. 安装完成后，您可以在开始菜单中找到 "Apple Music Downloader"
-
-### 方法二：从源码运行
-
-```bash
-git clone https://github.com/wenfeng110402/AppleMusic-Downloader.git
-cd AppleMusic-Downloader
-pip install -r requirements.txt
-```
 
 ## 环境要求
 
@@ -87,3 +67,5 @@ This tool is for educational and research purposes only. Any use that violates l
 
 By using this tool, you agree to comply with all applicable laws and assume full responsibility for your actions.  
 通过使用本工具，您同意遵守所有适用法律，并对您的行为承担全部责任。
+
+support the original creator plz
